@@ -17,3 +17,17 @@ class ReflexV2Info(HIDInfo):
 
     def __init__(self):
         super(ReflexV2Info, self).__init__(0x0483, 0x5750, 0x01, 0x81, 64)
+
+
+@dataclasses.dataclass
+class FSRSerialInfo():
+    """Sensor information for a dance pad with serial port communication"""
+
+    NUM_SENSORS: int
+
+
+class FSRReflexInfo(FSRSerialInfo):
+    """Sensor information for a reflex-style dance pad with serial port communication"""
+
+    def __init__(self):
+        super(FSRReflexInfo, self).__init__(16)

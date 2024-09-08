@@ -1,12 +1,12 @@
 from event_info import DataProcessMessage, WidgetMessage
 from pad_model import PadModel
 from profile_controller import ProfileController
-from reflex_controller import ReflexController
+from fsr_serial_controller import FSRSerialController
 
 
 class Sequences:
     pad_model = PadModel()
-    pad_controller = ReflexController(pad_model)
+    pad_controller = FSRSerialController(pad_model)
     profile_controller = ProfileController(pad_model)
     _sensor_delta = None
     _light_delta = None

@@ -8,3 +8,4 @@ libusb-package
 appdirs
 pyinstaller
 keyboard
+pyserial
