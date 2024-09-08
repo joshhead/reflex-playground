@@ -101,13 +101,36 @@ class SerialReadProcess(SerialDeviceProcess):
         self._event.set()
 
 
-class HIDWriteProcess(SerialDeviceProcess):
-    """Child class for writing data to an HID Endpoint."""
+class SerialWriteProcess(multiprocessing.Process):
+    """Class for writing data to serial connection."""
+
+    def __init__(self, pad_info: FSRSerialInfo, port: str):
+        super(SerialWriteProcess, self).__init__()
+        self._data = multiprocessing.Array('i', 64)
+        self._event = multiprocessing.Event()
+        self.start()
+
+    def terminate(self) -> None:
+        super().terminate()
+
+    def run(self) -> None:
+        while True:
+            self._process()
 
     def _process(self) -> None:
         pass
+
+    @property
+    def data(self) -> SynchronizedArray:
+        return self._data
+
+    @property
+    def event(self) -> Event:
+        return self._event
+
+    def _process(self) -> None:
         # self._device: usb.core.Device
         # with self._data.get_lock():
         #     data = [d for d in self._data]
         # self._device.write(self._info.WRITE_EP, data)
-        # self._event.set()
+        self._event.set()

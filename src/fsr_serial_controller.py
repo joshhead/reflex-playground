@@ -1,8 +1,7 @@
 from led_data_handler import LEDDataHandler
 from pad_model import Coord, PadModel
 from sensor_data_handler import SensorDataHandler
-from usb_controller import USBDeviceList, HIDReadProcess, HIDWriteProcess
-from serial_controller import SerialDeviceList, SerialReadProcess
+from serial_controller import SerialDeviceList, SerialReadProcess, SerialWriteProcess
 from usb_info import FSRReflexInfo
 
 
@@ -12,24 +11,23 @@ class FSRSerialPadInstance:
     def __init__(self, info: FSRReflexInfo, serial: str, model: PadModel):
         self._serial = serial
         self._read = SerialReadProcess(info, serial)
-        # self._write = HIDWriteProcess(info, serial)
+        self._write = SerialWriteProcess(info, serial)
         self._sensors = SensorDataHandler(
             self._read.data, self._read.event
         )
-        # self._lights = LEDDataHandler(
-        #     self._write.data, self._write.event, model
-        # )
+        self._lights = LEDDataHandler(
+            self._write.data, self._write.event, model
+        )
 
     def disconnect(self) -> None:
         self._read.terminate()
-        # self._write.terminate()
+        self._write.terminate()
 
     def handle_sensor_data(self) -> None:
         self._sensors.take_sample()
 
     def handle_light_data(self) -> None:
-        # self._lights.give_sample()
-        pass
+        self._lights.give_sample()
 
     @property
     def pad_data(self) -> dict[tuple[Coord, Coord], int]:
