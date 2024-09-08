@@ -64,7 +64,7 @@ class LEDDataGenerator:
         self._t += 1
         self._current_data = self._model.get_model_data()
         for panel_coord, panel in self._current_data.panels.items():
-            current_active = True
+            current_active = panel.active
             active_leds = self.PANEL_BASES[panel_coord]
             panel_value = self.get_panel_value(panel_coord, current_active)
             for led_coord, led in panel.leds.items():
