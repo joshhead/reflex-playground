@@ -89,10 +89,17 @@ class SerialReadProcess(SerialDeviceProcess):
         reports = line.split(" ")
         reports.pop(0)
 
-        # 20 sensor values, every 5th one we will ignore for now
+        # 20 sensor values, every 5th one we will ignore for now,
+        # and they are reordered to match where reflex playground
+        # expects the order of the arrows to be
         values = []
-        for x in [0, 1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18]:
-            values.append(int(reports[x]))
+        for x in [
+            5, 6, 7, 8,
+            15, 16, 17, 18,
+            0, 1, 2, 3,
+            10, 11, 12, 13,
+        ]:
+            values.append(int(reports[x]) // 6)
 
         with self._data.get_lock():
             for i, v in enumerate(values):
