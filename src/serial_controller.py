@@ -12,7 +12,7 @@ class SerialDeviceList:
     @staticmethod
     def connected_device_names() -> list[str | None]:
         ports: list[list_ports.ListPortInfo] = list_ports.comports()
-        return [port.device for port in ports if port.device == "COM16"]
+        return [port.device for port in ports if port.device == "COM16" or port.device == "COM4"]
 
     @staticmethod
     def get_device_by_serial(
@@ -52,8 +52,13 @@ class SerialDeviceProcess(multiprocessing.Process):
         if self._port is None:
             return
         # Set sensor thresholds high to avoid extra inputs from the keyboard or mouse
-        for i in range(20):
-            self._serial_command(f"{i} 1023")
+        if self._port == "COM16":
+            for i in range(20):
+                self._serial_command(f"{i} 1023")
+        elif self._port == "COM4":
+            # old pad still using the set threshold command with no space
+            for i in range(8):
+                self._serial_command(f"{i}1023")
         while True:
             self._process()
 
@@ -89,18 +94,35 @@ class SerialReadProcess(SerialDeviceProcess):
         reports = line.split(" ")
         reports.pop(0)
 
+        values = []
         # 20 sensor values, every 5th one we will ignore for now,
         # and they are reordered to match where reflex playground
         # expects the order of the arrows to be
-        values = []
-        for x in [
-            5, 6, 7, 8,
-            15, 16, 17, 18,
-            0, 1, 2, 3,
-            10, 11, 12, 13,
-        ]:
-            values.append(int(reports[x]) // 6)
-
+        if self._port == "COM16":
+            for x in [
+                5, 6, 7, 8,
+                15, 16, 17, 18,
+                0, 1, 2, 3,
+                10, 11, 12, 13,
+            ]:
+                values.append(int(reports[x]) // 6)
+        elif self._port == "COM4":
+            values.append(int(reports[2]) // 6)
+            values.append(int(reports[3]) // 6)
+            values.append(0)
+            values.append(0)
+            values.append(int(reports[6]) // 6)
+            values.append(int(reports[7]) // 6)
+            values.append(0)
+            values.append(0)
+            values.append(int(reports[0]) // 6)
+            values.append(int(reports[1]) // 6)
+            values.append(0)
+            values.append(0)
+            values.append(int(reports[4]) // 6)
+            values.append(int(reports[5]) // 6)
+            values.append(0)
+            values.append(0)
         with self._data.get_lock():
             for i, v in enumerate(values):
                 self._data[i * 2] = v.to_bytes(2, 'little')[0]
